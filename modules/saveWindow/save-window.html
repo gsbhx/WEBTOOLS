@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../assets/css/bootstrap-min.css">
+
+</head>
+<body>
+<div>
+    <div class="row">
+        <div class="col-1">
+
+        </div>
+        <div class="col-10">
+            <form>
+                <div class="form-group">
+                    <label>接口名称</label>
+                    <input
+                            type="text"
+                            class="form-control form-control-sm api-title"
+                            placeholder="请输入接口名称">
+                </div>
+                <div class="form-group">
+                    <label>接口描述</label>
+                    <textarea
+                            class="form-control form-control-sm api-desc"
+                            placeholder="请输入接口描述"
+                    />
+                    </textarea>
+                </div>
+                <div class="form-group">
+                    <label>选择分组</label>
+                    <select class="form-control form-control-sm group-list api-group">
+                        <option>Default select</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label></label>
+                    <button type="button" class="btn btn-info save-api-info">保存</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-1"></div>
+    </div>
+
+</div>
+<script>window.$ = window.jQuery = require('jquery') </script>
+<script src="../../assets/js/DefaultGroups.js"></script>
+<script src="./save-window.js"></script>
+</body>
+
+</html>
+
