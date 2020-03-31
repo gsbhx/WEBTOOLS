@@ -1,4 +1,6 @@
 const {app, BrowserWindow,Menu,MenuItem, ipcMain} = require('electron');
+const isDev = require('electron-is-dev');
+const path = require('path');
 const WindowCreate = require('./WindowCreate');
 const menuTemplate = require('./MenuTemplate');
 let mainWindow;
@@ -9,17 +11,17 @@ app.on("ready", () => {
         currentLink: {},
         currentId:{},
     };
+    const url = isDev ? 'http://localhost:3000' : 'local';
     mainWindow = new WindowCreate({
         width: 1024,
         height: 680,
         webPreferences: {
             nodeIntegration: true,
         }
-    }, './modules/mainWindow/index.html');
+    }, url);
 
     mainWindow.on("close", (e) => {
         mainWindow.webContents.send('main-window-will-close');
-        // e.preventDefault();
     });
 
 
