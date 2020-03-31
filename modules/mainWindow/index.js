@@ -13,7 +13,7 @@ var apis = store.get("apis") || [];
 };
 configStore.set("config",configObj);*/
 var configs=configStore.get("config")||{};
-console.log("api,config",apis,configs)
+console.log("api,config",apis,configs);
 
 ipcRenderer.on("main-window-will-close",(e)=>{
     let configObj={

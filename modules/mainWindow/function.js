@@ -149,7 +149,6 @@ function setCurrent(id, need = true) {
             break;
         }
     }
-    console.log("setCurrent", id, index);
     currentId = id;
     currentIndex = parseInt(index);
     if (need) {
@@ -157,9 +156,8 @@ function setCurrent(id, need = true) {
             openedIds = [...openedIds, id]
         }
     }
-
-    console.log(currentId, currentIndex);
     currentLink = apis[currentIndex];
+    console.log("setCurrent", id, index,openedIds,currentIndex,currentLink);
     setGlobalVariables();
     return true;
 }
