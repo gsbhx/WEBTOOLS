@@ -221,6 +221,7 @@ function App() {
                 />
                 <ResponsePanel
                     response={response}
+                    responseType="json"
                 />
             </div>
         </div>
