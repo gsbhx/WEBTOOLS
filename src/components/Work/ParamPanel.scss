@@ -1,0 +1,11 @@
+.params-row{
+    .params-delete{
+        display:none
+    }
+
+}
+.params-row:hover{
+    .params-delete{
+        display:block;
+    }
+}

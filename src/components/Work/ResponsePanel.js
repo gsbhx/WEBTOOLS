@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import ReactJson from 'react-json-view'
 const ResponsePanel = ({response}) => {
     const [responseType,setResponseType]=useState("text");
-    console.log("responseType==============",responseType);
     const getComponentByType=()=>{
         let component;
         switch(responseType){

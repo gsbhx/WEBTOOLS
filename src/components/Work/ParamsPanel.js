@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faTrash, faPlus} from '@fortawesome/free-solid-svg-icons';
+import "./ParamPanel.scss"
 
 const ParamsPanel = ({params, onSaveClick}) => {
     const [paramater, setParamater] = useState([]);
@@ -33,12 +34,19 @@ const ParamsPanel = ({params, onSaveClick}) => {
     const onInputValueChange = (e) => {
         let key=parseInt(e.target.getAttribute('data-key'));
         let para = paramater;
-        console.log("key=======",key);
-        // console.log("paramater=======",paramater,e.target.name,e.target.value,key);
         para[key]['values'][e.target.name] = e.target.value;
         setParamater(para);
         setRefresh(true);
 
+    };
+
+    const deleteOneRow=(e)=>{
+        let key=e.currentTarget.getAttribute('data-key');
+        let para=paramater;
+        para.splice(key,1);
+        console.log(key,para)
+        setParamater(para);
+        onSaveClick("","",para);
     };
     useEffect(()=>{
         refresh &&setTimeout(()=>setRefresh(false));
@@ -71,13 +79,12 @@ const ParamsPanel = ({params, onSaveClick}) => {
                     </div>
                 </div>
                 <div className="col-1">
-                    <span>操作</span>
                 </div>
             </div>
             {
                 paramater.map((v, k) => {
                     return (
-                        <div className="row mb-1 d-flex align-items-center" ref={node} data-key={k} key={k}>
+                        <div className="row mb-1 d-flex align-items-center params-row" ref={node} data-key={k} key={k}>
                             <div className="col-11">
                                 <div className="form-row">
                                     <div className="col-1">
@@ -119,7 +126,7 @@ const ParamsPanel = ({params, onSaveClick}) => {
                                 </div>
                             </div>
                             <div className="col-1">
-                                <a href="#" className=" bg-light">
+                                <a href="#" className=" bg-light params-delete" data-key={k} onClick={(e)=>deleteOneRow(e)}>
                                     <FontAwesomeIcon icon={faTrash}/>
                                 </a>
                             </div>

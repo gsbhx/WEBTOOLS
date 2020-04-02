@@ -131,10 +131,13 @@ function App() {
             }
         }
         setCurrentLink(current);
+
+        console.log("after save currentLink is",current)
         let allApis = apis;
         allApis[currentIndex] = current;
         setApis(allApis);
         saveToStore();
+        saveCurrentConfig();
         setRefresh(true);
         console.log('fileStore.get("files")', apiStore.get("apis"));
 
@@ -183,7 +186,7 @@ function App() {
         remote.getGlobal('currentApi').currentLink = currentLink;
         remote.getGlobal('currentApi').currentIndex = currentIndex;
         remote.getGlobal('currentApi').currentId = currentId;
-    }
+    };
 
     return (
         <div className="row" style={{height: "100%"}}>
