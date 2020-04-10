@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faTrash, faPlus} from '@fortawesome/free-solid-svg-icons';
+import {faTimes, faPlus} from '@fortawesome/free-solid-svg-icons';
 import "./ParamPanel.scss"
 
 const ParamsPanel = ({params, onSaveClick}) => {
@@ -126,9 +126,9 @@ const ParamsPanel = ({params, onSaveClick}) => {
                                 </div>
                             </div>
                             <div className="col-1">
-                                <a href="#" className=" bg-light params-delete" data-key={k} onClick={(e)=>deleteOneRow(e)}>
-                                    <FontAwesomeIcon icon={faTrash}/>
-                                </a>
+                                <button  className=" bg-light icon-button params-delete sm" data-key={k} onClick={(e)=>deleteOneRow(e)}>
+                                    <FontAwesomeIcon  icon={faTimes}/>
+                                </button>
                             </div>
                         </div>
                     )

@@ -3,6 +3,7 @@ const isDev = require('electron-is-dev');
 const path = require('path');
 const WindowCreate = require('./WindowCreate');
 const menuTemplate = require('./MenuTemplate');
+console.log(app.getPath('userData'));
 let mainWindow;
 let saveWindow;
 app.on("ready", () => {

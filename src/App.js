@@ -3,7 +3,8 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css';
 import ApiSearch from "./components/ApiSearch";
-// import DefaultLink from './utils/DefaultLink'
+import DefaultLink from './utils/DefaultLink'
+import defaultApiLink from "./utils/defaultApiLink";
 import ApiList from "./components/ApiList";
 import UrlPanel from "./components/Work/UrlPanel";
 import ParamsPanel from "./components/Work/ParamsPanel";
@@ -18,6 +19,8 @@ const apiStore = new Store({'name': 'Files Data'});
 const configStore = new Store({"name": 'Config Data'});
 // apiStore.set("apis", DefaultLink);
 
+var sq3=window.require("sqlite3").verbose();
+console.log("sl3",sq3);
 function App() {
     const [apis, setApis] = useState(apiStore.get('apis') || {});
     //插入默认的config
@@ -77,6 +80,26 @@ function App() {
         setCurrentIndex(index);
         setCurrentLink(apis[index]);
         saveCurrentConfig()
+    };
+
+    const addNewApi=()=>{
+        console.log("this is addnewApi");
+        let allApis=apis;
+        let lastId=parseInt(allApis[allApis.length-1].id);
+        let daf=defaultApiLink;
+        console.log("defaultApiLink",daf,allApis);
+        daf.id=lastId+1;
+        console.log("daf id",daf.id);
+        let length=allApis.push(daf);
+        setCurrentLink(daf);
+        setCurrentIndex(length-1);
+        setApis(allApis);
+        setCurrentId(daf.id);
+        console.log(daf);
+        console.log(allApis,currentLink,currentId,currentIndex);
+        setOpenedIds([...openedIds,daf.id]);
+        saveCurrentConfig();
+        saveToStore();
     };
 
     const saveCurrentConfig = () => {
@@ -207,6 +230,7 @@ function App() {
                     activeId={currentId}
                     onTabClick={tabClick}
                     onTabClose={tabClose}
+                    onTabAdd={addNewApi}
                 />
                 <UrlPanel
                     currentLink={currentLink}

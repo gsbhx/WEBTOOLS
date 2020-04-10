@@ -1,10 +1,10 @@
 import React from 'react'
 import classNames from 'classnames'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faTimes,faPlus} from '@fortawesome/free-solid-svg-icons'
+import {faTimes,faPlus,faCircle} from '@fortawesome/free-solid-svg-icons'
 import './TabList.scss'
 
-const TabList = ({files,openedIds, activeId, onTabClick,onTabClose}) => {
+const TabList = ({files,openedIds, activeId, onTabClick,onTabClose,onTabAdd}) => {
     return (
         <>
             <ul className="nav nav-tabs tablist-component border-bottom border-2 mb-3">
@@ -13,7 +13,6 @@ const TabList = ({files,openedIds, activeId, onTabClick,onTabClose}) => {
                         const fClassName = classNames({
                             'nav-link': true,
                             'active': file.id === activeId,
-                            'withUnsaved': false
                         });
                         return (
                             <li className="nav-item" key={file.id}>
@@ -35,7 +34,7 @@ const TabList = ({files,openedIds, activeId, onTabClick,onTabClose}) => {
                                         }}
                                     >
                                     <FontAwesomeIcon
-                                        icon={faTimes}
+                                        icon={file.isUnsaved?faCircle:faTimes}
                                     />
                                 </span>
                                 </a>
@@ -44,9 +43,8 @@ const TabList = ({files,openedIds, activeId, onTabClick,onTabClose}) => {
                     }
                     return true;
                 })}
-                <li className="nav-item">
-                    <a href="#" className="nav-link active small" >
-
+                <li className="nav-item" onClick={(e)=>onTabAdd(e)}>
+                    <a href="#" className="nav-link active small">
                         <FontAwesomeIcon icon={faPlus} />
                     </a>
 

@@ -1,11 +1,12 @@
 const defaultLink = [
     {
-        id: '1',
+        id: 1,
         title: "请求本地127.0.0.1",
         describtion:"",
         groupid:1,
         type: 'GET',
         url: "http://127.0.0.1",
+        isUnsaved:false,
         headers: [
             {
                 status: true,
@@ -29,12 +30,13 @@ const defaultLink = [
         createdAt: 1563762965704
     },
     {
-        id: '2',
+        id: 2,
         title: "请求本地127.0.0.2",
         describtion:"",
         groupid:1,
         type: 'POST',
         url: "http://127.0.0.2",
+        isUnsaved:false,
         headers: [
             {
                 status: true,
@@ -58,12 +60,13 @@ const defaultLink = [
         createdAt: 1563762965704
     },
     {
-        id: '3',
+        id: 3,
         title: "请求本地127.0.0.3",
         describtion:"",
         groupid:1,
         type: 'DELETE',
         url: "http://127.0.0.3",
+        isUnsaved:false,
         headers: [
             {
                 status: true,
@@ -87,12 +90,13 @@ const defaultLink = [
         createdAt: 1563762965704
     },
     {
-        id: '4',
+        id: 4,
         title: "请求本地127.0.0.4",
         describtion:"",
         groupid:1,
         type: 'PUT',
         url: "http://127.0.0.4",
+        isUnsaved:false,
         headers: [
             {
                 status: true,
