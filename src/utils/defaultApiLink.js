@@ -2,10 +2,10 @@ const defaultApiLink = {
     id: 0,
     title: "请求本地127.0.0.1",
     describtion: "",
-    groupid: 1,
+    group_id: 1,
     type: 'GET',
     url: "http://127.0.0.1",
-    isUnsaved: true,
+    unsaved: 1,
     headers: [
         {
             status: true,
@@ -26,7 +26,7 @@ const defaultApiLink = {
     }
 
     ],
-    createdAt: 1563762965704
+    create_time: 1563762965704
 };
 
 export default defaultApiLink

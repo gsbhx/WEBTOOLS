@@ -48,11 +48,12 @@ const ParamsPanel = ({params, onSaveClick}) => {
         setParamater(para);
         onSaveClick("","",para);
     };
-    useEffect(()=>{
+   /* useEffect(()=>{
         refresh &&setTimeout(()=>setRefresh(false));
 
-    },[refresh]);
+    },[refresh]);*/
     useEffect(()=>{
+        console.log("ParamsPanel useEffect params:",params,typeof params)
         setParamater(params);
     },[params]);
     const onInputBlur=(e)=>{

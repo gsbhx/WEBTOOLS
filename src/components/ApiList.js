@@ -1,15 +1,19 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
+import Data from '../utils/Data'
 
 
-const ApiList = ({apis,onLinkOpen,activeId}) => {
+const ApiList = ({apis,onLinkOpen, activeId}) => {
+
     return (
         <ul className="list-group list-group-flush link-list">
             {
-                apis.map(api => (
+                apis&&apis.map(api => (
                     <li
-                        className={(activeId===api.id ? "text-danger ":"" )+"list-group-item d-flex align-items-center  justify-content-around link-item"}
+                        className={(activeId === api.id ? "text-danger " : "") + "list-group-item d-flex align-items-center  justify-content-around link-item"}
                         key={Math.random()}
-                        onClick={()=>{onLinkOpen(api.id)}}
+                        onClick={() => {
+                            onLinkOpen(api.id)
+                        }}
                     >
                        <span
                            className="text-success  font-weight-bold align-text-top border-1"

@@ -3,49 +3,39 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css';
 import ApiSearch from "./components/ApiSearch";
-import DefaultLink from './utils/DefaultLink'
-import defaultApiLink from "./utils/defaultApiLink";
 import ApiList from "./components/ApiList";
 import UrlPanel from "./components/Work/UrlPanel";
 import ParamsPanel from "./components/Work/ParamsPanel";
 import ParamsTitle from "./components/Work/ParamsTitle";
 import TabList from "./components/TabList";
+import defaultApiLink from "./utils/defaultApiLink";
 import useIpcRenderer from "./hooks/useIpcRenderer";
 import Tools from "./utils/Tools";
 import ResponsePanel from "./components/Work/ResponsePanel";
-const Store = window.require('electron-store');
-const { ipcRenderer,remote }=window.require("electron");
-const apiStore = new Store({'name': 'Files Data'});
-const configStore = new Store({"name": 'Config Data'});
-// apiStore.set("apis", DefaultLink);
+import Data from "./utils/Data";
 
-var sq3=window.require("sqlite3").verbose();
-console.log("sl3",sq3);
+const {ipcRenderer, remote} = window.require("electron");
+
 function App() {
-    const [apis, setApis] = useState(apiStore.get('apis') || {});
-    //插入默认的config
-    // let configObj = {
-    //     currentIndex: 0,
-    //     currentLink: apis[0],
-    //     currentId: apis[0].id,
-    //     openedIds: [],
-    //     isHeaderShow: 0,
-    // };
-    // configStore.set("config", configObj);
-    const [refresh,setRefresh] = useState(false);
-    var configs = configStore.get('config');
-    const [openedIds, setOpenedIds] = useState(configs.openedIds);
-    const [isHeaderShow, setIsHeaderShow] = useState(configs.isHeaderShow);
-    const [currentId, setCurrentId] = useState(configs.currentId);
-    const [currentLink, setCurrentLink] = useState(configs.currentLink);
-    const [currentIndex, setCurrentIndex] = useState(configs.currentIndex);
-    const [response,setResponse]=useState({});
-    const onSearchButtonClick=()=>{
-        Tools.sendHttpRequest(currentLink).then((res)=>{
-            console.log("app,result",res);
+    const [apis, setApis] = useState([]);
+    const [openedIds, setOpenedIds] = useState([]);
+    const [headerStatus, setHeaderStatus] = useState(false);
+    const [currentId, setCurrentId] = useState(0);
+    const [currentLink, setCurrentLink] = useState({});
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [response, setResponse] = useState({});
+    const [refresh, setRefresh] = useState(false); //更新数据后重新渲染
+    const [tabsNeedUpdate, setTabsNeedUpdate] = useState(true); //tabs表内容更改后重新加载
+    const [curNeedUpdate, setCurNeedUpdate] = useState(false); //tabs表内容更改后重新加载
+    const [curLinkNeedUpdate, setCurLinkNeedUpdate] = useState(false); //tabs表内容更改后重新加载
+
+    //发送Api请求
+    const onSearchButtonClick = () => {
+        Tools.sendHttpRequest(currentLink).then((res) => {
+            console.log("app,result", res);
             setResponse(res);
-        },err=>{
-            console.log("app,err",err)
+        }, err => {
+            console.log("app,err", err)
             setResponse(err);
         })
     };
@@ -71,7 +61,7 @@ function App() {
         if (!openedIds.includes(id)) {
             setOpenedIds([...openedIds, id])
         }
-        saveCurrentConfig()
+        setCurNeedUpdate(true);
     };
 
     const tabClick = (id) => {
@@ -79,40 +69,27 @@ function App() {
         let index = getCurrentIndex(id);
         setCurrentIndex(index);
         setCurrentLink(apis[index]);
-        saveCurrentConfig()
+        setCurNeedUpdate(true)
     };
 
-    const addNewApi=()=>{
-        console.log("this is addnewApi");
-        let allApis=apis;
-        let lastId=parseInt(allApis[allApis.length-1].id);
-        let daf=defaultApiLink;
-        console.log("defaultApiLink",daf,allApis);
-        daf.id=lastId+1;
-        console.log("daf id",daf.id);
-        let length=allApis.push(daf);
+    const addNewApi = () => {
+        console.log("adNewApi")
+        let allApis = apis;
+        let lastId = parseInt(allApis[0].id);
+        let daf = JSON.parse(JSON.stringify(defaultApiLink));
+        daf.id = lastId + 1;
         setCurrentLink(daf);
-        setCurrentIndex(length-1);
+        console.log("addNewApi defaultApiLink", defaultApiLink, typeof defaultApiLink.headers)
+        console.log("addNewApi daf", daf)
+        console.log("addNewApi currentLink", currentLink)
+        setCurrentIndex(0);
+        console.log("addNewApi allApis", allApis)
         setApis(allApis);
         setCurrentId(daf.id);
-        console.log(daf);
-        console.log(allApis,currentLink,currentId,currentIndex);
-        setOpenedIds([...openedIds,daf.id]);
-        saveCurrentConfig();
-        saveToStore();
-    };
-
-    const saveCurrentConfig = () => {
-        setGlobalVariables();
-        let configObj = {
-            currentIndex: currentIndex,
-            currentLink: currentLink,
-            currentId: currentId,
-            openedIds: openedIds,
-            isHeaderShow: isHeaderShow,
-        };
-        configStore.set("config", configObj);
-
+        setOpenedIds([...openedIds, daf.id]);
+        setCurNeedUpdate(true)
+        Data.insertRowTab(daf).then(res => {
+        });
     };
 
     const tabClose = (id) => {
@@ -123,7 +100,7 @@ function App() {
         } else {
             setCurrentId('')
         }
-        saveCurrentConfig()
+        setCurNeedUpdate(true);
     };
 
     /**
@@ -134,83 +111,102 @@ function App() {
      * @constructor
      */
     const UpdateThisRow = (url, method, params) => {
-        console.log("first current", currentIndex, currentLink, params)
         if (Object.keys(currentLink).length === 0) {
             return false;
         }
-
         let current = currentLink;
-        if (url) {
-            current.url = url;
-        }
-        if (method) {
-            current.type = method;
-        }
-        if (params) {
-            if (isHeaderShow) {
-                current.headers = params;
-            } else {
-                current.params = params;
-            }
-        }
+        url && (current.url = url);
+        method && (current.type = method);
+        params && (headerStatus ? current.headers = params : current.params = params)
         setCurrentLink(current);
-
-        console.log("after save currentLink is",current)
         let allApis = apis;
         allApis[currentIndex] = current;
         setApis(allApis);
-        saveToStore();
-        saveCurrentConfig();
-        setRefresh(true);
-        console.log('fileStore.get("files")', apiStore.get("apis"));
+        setCurNeedUpdate(true)
+        setCurLinkNeedUpdate(true);
 
     };
-
-    useIpcRenderer({
-        'save-current-api': e => saveCurrentApi(e),
-        'main-window-will-close': e => mainWindowWillClose(e),
-        'ready-to-save-api': (e, data) => readyToSaveApi(e, data)
-    });
-    const mainWindowWillClose = (e) => {
-        let configObj = {
-            currentIndex: currentIndex || 0,
-            currentLink: currentLink || apis[currentIndex],
-            currentId: currentId || currentLink.id,
-            openedIds: openedIds || [],
-            isHeaderShow: isHeaderShow || 0,
+    /**
+     * 需要更新currentConfig
+     */
+    useEffect(() => {
+        console.log("正在更新currentConfig");
+        const getCurrentConfig = async () => {
+            await Data.getCurrentConfig().then(configs => {
+                console.log("await current configs", configs);
+                setOpenedIds(configs.openedIds)
+                setHeaderStatus(configs.headerStatus);
+                setCurrentId(configs.currentId);
+                setCurrentLink(configs.currentLink);
+                setCurrentIndex(configs.currentIndex);
+                setCurNeedUpdate(false);
+            })
         };
-        configStore.set("config", configObj);
+        getCurrentConfig();
+    }, []);
+    /**
+     * 需要更新全局tabs
+     */
+    useEffect(() => {
+        console.log("正在更新allTabs");
+        const getAllTabs = async () => {
+            await Data.getAllTabs().then(res => {
+                setTabsNeedUpdate(false);
+                setApis(res)
+            });
+        }
+        if (tabsNeedUpdate === true) {
+            getAllTabs();
+            setTabsNeedUpdate(false);
+        }
+    }, [tabsNeedUpdate]);
+    useEffect(() => {
+        console.log("正在保存CurrentConfig");
+        const saveCurrentConfig = async () => {
+            setGlobalVariables();
+            let configObj = {
+                currentIndex: currentIndex,
+                currentLink: currentLink,
+                currentId: currentId,
+                openedIds: openedIds,
+                headerStatus: headerStatus,
+            };
+            await Data.saveCurrentConfig(configObj).then(res => {
+            })
+        };
+        if (curNeedUpdate === true) {
+            saveCurrentConfig()
+            setCurNeedUpdate(false);
+        }
 
-    };
-    const saveCurrentApi = (e) => {
-        ipcRenderer.send("open-save-window");
-    };
+    }, [currentLink, currentId, currentIndex, openedIds, headerStatus]);
+    useEffect(() => {
+        console.log("正在更新currentLink");
+        const currentLinkUpdate = async () => {
+            await Data.saveRowTab(currentLink).then(res => {
+                setTabsNeedUpdate(true);
+            });
+        }
+        if (curLinkNeedUpdate === true) {
+            currentLinkUpdate();
+            setCurLinkNeedUpdate(false);
+        }
+    }, [currentLink])
+    /**
+     * 数据更改后重新渲染页面
+     */
+    /*useEffect(() => {
+        refresh && setTimeout(() => setRefresh(false));
 
-    const readyToSaveApi = (e, data) => {
-        currentLink.title = data.title;
-        currentLink.describtion = data.describtion;
-        currentLink.group = data.group_id;
-        saveToStore();
-        ipcRenderer.send("api-save-ok");
-    };
-
-    const saveToStore = () => {
-        console.log("已保存到store");
-        apis[currentIndex] = currentLink;
-        apiStore.set("apis", apis);
-        setRefresh(true);
-    };
-    useEffect(()=>{
-        refresh &&setTimeout(()=>setRefresh(false));
-
-    },[refresh]);
-
-    const setGlobalVariables=()=> {
+    }, [refresh]);*/
+    /**
+     * 将当前焦点数据保存到全局变量
+     */
+    const setGlobalVariables = () => {
         remote.getGlobal('currentApi').currentLink = currentLink;
         remote.getGlobal('currentApi').currentIndex = currentIndex;
         remote.getGlobal('currentApi').currentId = currentId;
     };
-
     return (
         <div className="row" style={{height: "100%"}}>
             <div className="col-4 border-right">
@@ -238,17 +234,17 @@ function App() {
                     onSendClick={onSearchButtonClick}
                 />
                 <ParamsTitle
-                    isHeaderShow={isHeaderShow}
-                    onParamsClick={setIsHeaderShow}
+                    headerStatus={headerStatus}
+                    onParamsClick={setHeaderStatus}
+                    onChangeHeaderStatus={setCurNeedUpdate}
                 />
                 <ParamsPanel
-                    isHeaderShow={isHeaderShow}
-                    params={(isHeaderShow ? ((currentLink && currentLink.headers) || []) : ((currentLink && currentLink.params)) || [])}
+                    headerStatus={headerStatus}
+                    params={(headerStatus ? ((currentLink && currentLink.headers) || []) : ((currentLink && currentLink.params)) || [])}
                     onSaveClick={UpdateThisRow}
                 />
                 <ResponsePanel
                     response={response}
-                    responseType="json"
                 />
             </div>
         </div>
