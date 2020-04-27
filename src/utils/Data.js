@@ -22,7 +22,7 @@ const Data = {
                     for (let i in result) {
                         result[i].headers = JSON.parse(result[i].headers);
                         result[i].params = JSON.parse(result[i].params);
-                        result[i].type=Data.getAllSendMethod()[result[i].type]||'UnKnown'
+                        result[i].type = Data.getAllSendMethod()[result[i].type] || 'UnKnown'
                     }
 
                     console.log("getAllTabdddddddddd result", result)
@@ -82,11 +82,18 @@ const Data = {
             let db = new SQLDB("Tables.db");
             return new Promise(((resolve, reject) => {
                 db.fetchRow(id, 'tabs').then(res => {
-                    res.type = this.getAllSendMethod()[res.type];
-                    resolve(res)
+                    console.log("getTabById", res, id);
+                    if (res.length > 0) {
+                        res[0].type = Data.getAllSendMethod()[res[0].type];
+                        res[0].headers = JSON.parse(res[0].headers)
+                        res[0].params = JSON.parse(res[0].params)
+                        resolve(res[0])
+                    }
+
                 })
             }))
         },
+
         saveAllTab: (data) => {
 
             return new Promise((resolve, reject) => {
@@ -103,17 +110,17 @@ const Data = {
          * @returns {Promise<unknown>}
          */
         insertRowTab: (params) => {
-            let data = JSON.parse(JSON.stringify(params))
-            data.headers = JSON.stringify(data.headers);
-            data.params = JSON.stringify(data.params);
-            data.type = Data.getAllSendMethodType()[data.type];
-            data.create_time = parseInt(new Date().getTime() / 1000);
-            const db = new SQLDB("Tables.db");
+            let idata = JSON.parse(JSON.stringify(params))
+            idata.headers = JSON.stringify(idata.headers);
+            idata.params = JSON.stringify(idata.params);
+            idata.type = Data.getAllSendMethodType()[idata.type];
+            idata.create_time = parseInt(new Date().getTime() / 1000);
+
             console.log("insertRowTab,开始创建Promise")
-            return new Promise((resolve, reject) => {
-                console.log("insertRowTab,promise 1")
-                db.insert('tabs', data).then(res => {
-                    console.log("insertRowTab,开始回调")
+            return new Promise((resolve) => {
+                const db = new SQLDB("Tables.db");
+                db.insert('tabs', idata).then(res => {
+                    console.log("insertRowTab,开始回调",res);
                     resolve()
                 }, err => {
                     console.log("insertRowTab 这里貌似出了点问题……", err)
@@ -139,7 +146,5 @@ const Data = {
                 })
             })
         },
-
-    }
-;
+    };
 export default Data;

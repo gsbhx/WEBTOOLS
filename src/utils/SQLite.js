@@ -5,6 +5,11 @@ class SQLDB {
         this._db = new SQLite3.Database(dbName);
     }
 
+    destructor(){
+        this._db.close();
+    }
+
+
     query(sql, param = []) {
         return new Promise(((resolve, reject) => {
             this._db.all(sql, param, (err, res) => {
@@ -20,17 +25,18 @@ class SQLDB {
     };
 
     execute(sql, param = []) {
-        return new Promise(((resolve, reject) => {
-            this._db.run(sql, param, (err) => {
+        return new Promise((resolve, reject) => {
+            this._db.run(sql, param, function (err) {
                 if (err) {
-                    console.log("execute err:", err)
-                    reject(err)
-                } else
-                    resolve(this)
-            })
-        }))
-    };
+                    console.log("sqlErr:", err)
+                    reject(err);
+                } else {
+                    resolve({changes:this.changes,lastID:this.lastID});
+                }
 
+            })
+        })
+    };
 
 
     update(table, data, where) {
@@ -41,38 +47,35 @@ class SQLDB {
         if (where) {
             sql += " WHERE " + where;
         }
-        return new Promise(((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.execute(sql, where_info.param).then(res => {
                 resolve(res.changes);
             }, err => {
                 console.log("update err", err)
                 reject(false);
             });
-        }))
+        })
 
     }
 
     insert(table, data, where) {
         delete data.id;
-        let keys = Object.keys(data).join(",");
-        let values = Object.values(data)
-        for (let i in values) {
-            values[i] = "'" + values[i] + "'";
-        }
-
-        values = values.join(",");
-        let sql = ` insert into ${table} (${keys}) values (${values})`;
-        return new Promise(((resolve, reject) => {
-            this.execute(sql, [], res => {
+        return new Promise((resolve,reject) => {
+            let keys = Object.keys(data).join(",");
+            let values = Object.values(data)
+            for (let i in values) {
+                values[i] = "'" + values[i] + "'";
+            }
+            values = values.join(",");
+            let sql = ` insert into ${table} (${keys}) values (${values})`;
+            this.execute(sql, []).then( res => {
                 console.log("insert res", res);
                 resolve(res);
             }, err => {
-                console.log("insert ERR", err)
                 reject(err);
+                console.log("insert ERR", err);
             })
-        }))
-
-
+        })
     };
 
     delete(where, table) {
@@ -80,16 +83,16 @@ class SQLDB {
         if (where) {
             sql += " where " + where;
         }
-        return new Promise(((resolve) => {
+        return new Promise((resolve) => {
             this.execute(sql, []).then(res => {
                 resolve(res);
             })
-        }))
+        })
     }
 
     fetchRow(id, table) {
         let sql = `select * from ${table} where id=?`
-        return new Promise(((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.query(sql, [id]).then(res => {
                 console.log("fetchAll res", res)
                 resolve(res);
@@ -97,12 +100,12 @@ class SQLDB {
                 console.log("fetchALL ERR", err)
                 reject(false);
             })
-        }))
+        })
     }
 
     fetchAll(table) {
         let sql = `select * from ${table} ORDER BY id DESC`;
-        return new Promise(((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.query(sql, []).then(res => {
                 console.log("fetchAll res", res)
                 resolve(res);
@@ -110,7 +113,7 @@ class SQLDB {
                 console.log("fetchALL ERR", err)
                 reject(false);
             })
-        }))
+        })
 
     }
 
