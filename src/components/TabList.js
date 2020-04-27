@@ -22,7 +22,7 @@ const TabList = ({openedIds, onTabClick,onTabClose,currentId}) => {
     },[reloadTab]);
     const changeCurrent=(e)=>{
         let tabId=e.currentTarget.getAttribute("data-id");
-        onTabClick(parseInt(tabId));
+        onTabClick(parseInt(tabId),false);
 
     };
 
@@ -36,7 +36,7 @@ const TabList = ({openedIds, onTabClick,onTabClose,currentId}) => {
         Data.insertRowTab(daf).then(res=>{
             console.log("addNewApi,insertRowTab",res);
             console.log("addNewApi,insertRowTab,daf.id",daf.id);
-            onTabClick(daf.id);
+            onTabClick(daf.id,true);
             setReloadTab(true);
         });
     };
@@ -47,7 +47,7 @@ const TabList = ({openedIds, onTabClick,onTabClose,currentId}) => {
                     if(openedIds.includes(tab.id)){
                         const fClassName = classNames({
                             'nav-link': true,
-                            'active': tab.id==currentId,
+                            'active': parseInt(tab.id)===currentId,
                         });
                         return (
                             <li className="nav-item" key={tab.id}>

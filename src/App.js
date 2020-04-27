@@ -17,12 +17,14 @@ function App() {
     const [response, setResponse] = useState({});
     const [currentConfigNeedUpdate, setCurrentConfigNeedUpdate] = useState(false); //焦点数据是否需要更新的状态
     const [refresh,setRefresh]=useState(false);
+    const [isNew,setIsNew]=useState(false);
     /**
      * 点击列表中的某个api
      * @param id
      */
-    const onTabClick = (id) => {
+    const onTabClick = (id,isNew) => {
         setCurrentId(id);
+        setIsNew(isNew);
         if (!openedIds.includes(id)) {
             setOpenedIds([...openedIds, id])
         }
@@ -100,6 +102,8 @@ function App() {
                 <ApiList
                     onTabClick={onTabClick}
                     currentId={currentId}
+                    isNew={isNew}
+                    setIsNew={setIsNew}
                 />
             </div>
             <div className="col-8 border-left">
