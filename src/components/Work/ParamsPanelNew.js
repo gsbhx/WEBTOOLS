@@ -127,7 +127,9 @@ const ParamsPanelNew = ({id,setResponse}) => {
                     onChange={(e) => setTabUrlAndMethod(e)}
                 />
                 <div className="input-group-append mr-3">
-                    <button className="btn btn-outline-secondary btn-primary text-white" type="button">发送
+                    <button className="btn btn-outline-secondary btn-primary text-white" type="button"
+                        onClick={onSearchButtonClick}
+                    >发送
                     </button>
                 </div>
             </div>
