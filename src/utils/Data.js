@@ -21,7 +21,8 @@ const Data = {
                     console.log("getAllTabssssssssss result", result)
                     for (let i in result) {
                         result[i].headers = JSON.parse(result[i].headers);
-                        result[i].params = JSON.parse(result[i].params);
+                        result[i].raw_params = JSON.parse(result[i].raw_params);
+                        result[i].form_params = JSON.parse(result[i].form_params);
                         result[i].type = Data.getAllSendMethod()[result[i].type] || 'UnKnown'
                     }
 
@@ -86,7 +87,8 @@ const Data = {
                     if (res.length > 0) {
                         res[0].type = Data.getAllSendMethod()[res[0].type];
                         res[0].headers = JSON.parse(res[0].headers)
-                        res[0].params = JSON.parse(res[0].params)
+                        res[0].raw_params = JSON.parse(res[0].raw_params);
+                        res[0].form_params = JSON.parse(res[0].form_params);
                         resolve(res[0])
                     }
 
@@ -136,7 +138,8 @@ const Data = {
             let data = JSON.parse(JSON.stringify(params))
             console.log("saveRowTabsaveRowTabsaveRowTabsaveRowTab", data)
             data.headers = JSON.stringify(data.headers);
-            data.params = JSON.stringify(data.params);
+            data.form_params = JSON.stringify(data.form_params);
+            data.raw_params = JSON.stringify(data.raw_params);
             data.type = Data.getAllSendMethodType()[data.type];
             const db = new SQLDB("Tables.db");
             return new Promise((resolve, reject) => {

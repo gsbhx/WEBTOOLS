@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faTimes, faPlus} from '@fortawesome/free-solid-svg-icons';
 import "./ParamPanel.scss"
 import Data from "../../utils/Data";
 import Tools from "../../utils/Tools";
+import ParamsHeaders from "./ParamsHeaders";
+import ParamsBodys from "./ParamsBodys";
 
-const ParamsPanelNew = ({id,setResponse}) => {
+const ParamsPanelNew = ({id, setResponse}) => {
     const methodTypes = ['GET', 'POST', 'PUT', 'DELETE'];
-    const [headerStatus,setHeaderStatus]=useState(false);
+    const [headerStatus, setHeaderStatus] = useState(false);
     const [tab, setTab] = useState(null);
     const [paramName, setParamName] = useState(null);
     const [needTabToSave, setNeedTabToSave] = useState(false);
@@ -19,7 +19,7 @@ const ParamsPanelNew = ({id,setResponse}) => {
             console.log("ParamsPanelTwo getOneRowById")
             await Data.getTabById(id).then(res => {
                 setTab(res);
-                headerStatus ? setParamName("headers") : setParamName("params");
+                headerStatus ? setParamName("headers") : (res.format==0?setParamName("form_params"):setParamName("raw_params"));
             })
         };
         if (id !== 0)
@@ -65,28 +65,33 @@ const ParamsPanelNew = ({id,setResponse}) => {
         setNeedTabToSave(true);
     };
     const onInputValueChange = (e) => {
-        let key = parseInt(e.target.getAttribute('data-key'));
         let tabCopy = JSON.parse(JSON.stringify(tab));
-        tabCopy[paramName][key]['values'][e.target.name] = e.target.value;
+        if(headerStatus==false && paramName=='raw_params'){
+             tabCopy[paramName]=e;
+        }else{
+            let key = parseInt(e.target.getAttribute('data-key'));
+            tabCopy[paramName][key]['values'][e.target.name] = e.target.value;
+        }
         setTab(tabCopy);
         setNeedTabToSave(true);
     };
     const deleteOneRow = (e) => {
         let key = parseInt(e.currentTarget.getAttribute('data-key'));
         let tabCopy = JSON.parse(JSON.stringify(tab));
+        console.log("deleteOneRow paramsName",paramName)
         tabCopy[paramName].splice(key, 1);
         setTab(tabCopy);
         setNeedTabToSave(true);
     };
-    const setTabUrlAndMethod=(e)=>{
+    const setTabUrlAndMethod = (e) => {
         let key = e.currentTarget.getAttribute('name');
         let tabCopy = JSON.parse(JSON.stringify(tab));
-        tabCopy[key]=e.currentTarget.value;
+        tabCopy[key] = e.currentTarget.value;
         setTab(tabCopy);
         setNeedTabToSave(true);
     }
     const getParams = () => {
-        let res = tab === null ? [] : (headerStatus ? tab.headers : tab.params);
+        let res = tab === null ? [] : (headerStatus ? tab.headers : (tab.format==0? tab.form_params:tab.raw_params));
         console.log("ParamsPanelTwo getParams", res, tab);
         return res;
     }
@@ -101,6 +106,14 @@ const ParamsPanelNew = ({id,setResponse}) => {
             setResponse(err);
         })
     };
+
+    const onParamsFormatClick=(e)=>{
+        let tabCopy = JSON.parse(JSON.stringify(tab));
+        tabCopy.format = e.currentTarget.value;
+        setTab(tabCopy);
+        headerStatus ? setParamName("headers") : (tab &&tab.format==0?setParamName("form_params"):setParamName("raw_params"));
+        setNeedTabToSave(true);
+    }
     return (
         <>
 
@@ -128,12 +141,12 @@ const ParamsPanelNew = ({id,setResponse}) => {
                 />
                 <div className="input-group-append mr-3">
                     <button className="btn btn-outline-secondary btn-primary text-white" type="button"
-                        onClick={onSearchButtonClick}
+                            onClick={onSearchButtonClick}
                     >发送
                     </button>
                 </div>
             </div>
-            <ul className="nav nav-tabs mb-3">
+            <ul className={(headerStatus ? "mb-1 ": "") + "nav nav-tabs"}>
                 <li className="nav-item">
                 <span className={(headerStatus ? "active" : "") + " nav-link"} onClick={() => {
                     setHeaderStatus(true)
@@ -145,99 +158,41 @@ const ParamsPanelNew = ({id,setResponse}) => {
                 }}>Body</span>
                 </li>
             </ul>
-            <form id="params">
-                <div className="row">
-                    <div className="col-11">
-                        <div className="form-row mb-3 d-flex align-items-center text-center">
-                            <div className="col-1">
-                                选择
-                            </div>
-                            <div className="col">
-                                参数名
-                            </div>
-                            <div className="col">
-                                参数值
-                            </div>
-                            <div className="col">
-                                描述
-                            </div>
-                        </div>
+            {
+                headerStatus===false &&
+                <div className="row d-flex justify-content-around align-items-center pt-2 pb-2 border-bottom mb-1">
+                    <div className="col-1"> </div>
+                    <div className="col-2">
+                        <input type="radio" name="params-format" checked={tab &&tab.format==0 ? true:false} value="0" onClick={(e)=>{onParamsFormatClick(e);}}/>FORM-DATA
                     </div>
-                    <div className="col-1">
+                    <div className="col-2">
+                        <input type="radio" name="params-format" checked={tab && tab.format==1 ? true:false} value="1" onClick={(e)=>onParamsFormatClick(e)}/>RAW
                     </div>
+                    <div className="col-7"> </div>
                 </div>
-                {
-                    (getParams()).map((v, k) => {
-                        return (
-                            <div className="row mb-1 d-flex align-items-center params-row" data-key={k} key={k}>
-                                <div className="col-11">
-                                    <div className="form-row">
-                                        <div className="col-1">
-                                            <input type="checkbox" data-key={k} checked={v.status}
-                                                   className="form-control"
-                                                   onChange={e => onCheckBoxValueChange(e)}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input
-                                                type="text"
-                                                name="key"
-                                                data-key={k}
-                                                value={v.values.key}
-                                                className="form-control "
-                                                onChange={(e) => onInputValueChange(e)}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input
-                                                type="text"
-                                                name="value"
-                                                data-key={k}
-                                                value={v.values.value}
-                                                className="form-control"
-                                                onChange={(e) => onInputValueChange(e)}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input
-                                                type="text"
-                                                name="describtion"
-                                                data-key={k}
-                                                value={v.values.describtion}
-                                                className="form-control"
-                                                onChange={(e) => onInputValueChange(e)}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-1">
-                                    <button type="button" className=" bg-light icon-button params-delete sm"
-                                            data-key={k} onClick={(e) => deleteOneRow(e)}>
-                                        <FontAwesomeIcon icon={faTimes}/>
-                                    </button>
-                                </div>
-                            </div>
-                        )
+            }
+            {
+                headerStatus ?
+                    <ParamsHeaders
+                        params={getParams()}
+                        onCheckBoxValueChange={onCheckBoxValueChange}
+                        onInputValueChange={onInputValueChange}
+                        deleteOneRow={deleteOneRow}
+                        appendANewList={appendANewList}
+                    />
+                    :
+                    <ParamsBodys
+                        format={tab &&tab.format}
+                        params={getParams()}
+                        onCheckBoxValueChange={onCheckBoxValueChange}
+                        onInputValueChange={onInputValueChange}
+                        deleteOneRow={deleteOneRow}
+                        appendANewList={appendANewList}
+                    />
+            }
 
-                    })
-                }
-                <div className="row mb-1" key={Math.random()}>
-                    <div className="col-11">
-                        <div className="form-row">
-                            <div className="col-1"></div>
-                            <div className="col-11 ">
-                                <button className="btn btn-primary form-control" type="button"
-                                        onClick={e => appendANewList(e)}>
-                                    <FontAwesomeIcon icon={faPlus}/>
-                                </button>
-                            </div>
-                        </div>
 
-                    </div>
 
-                </div>
-
-            </form>
 
         </>
     )
