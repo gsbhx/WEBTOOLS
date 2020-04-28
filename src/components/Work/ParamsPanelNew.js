@@ -98,7 +98,19 @@ const ParamsPanelNew = ({id, setResponse}) => {
 
     //发送Api请求
     const onSearchButtonClick = () => {
-        Tools.sendHttpRequest(tab).then((res) => {
+        let data={params:tab.form_params,headers:tab.headers};
+        if(tab.format==1){
+            data.params=tab.raw_params;
+            data.headers.map((v,k)=>{
+                console.log("data,map v",v);
+                if(v.values.key.toLowerCase()=='content-type'){
+                    v.values.value='application/json';
+                }
+            })
+        }
+
+
+        Tools.sendHttpRequest(data).then((res) => {
             console.log("app,result", res);
             setResponse(res);
         }, err => {
@@ -190,10 +202,6 @@ const ParamsPanelNew = ({id, setResponse}) => {
                         appendANewList={appendANewList}
                     />
             }
-
-
-
-
         </>
     )
 };

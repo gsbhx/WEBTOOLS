@@ -1,4 +1,5 @@
 import $ from 'jquery'
+
 const Tools = {
     /**
      * 发送http请求
@@ -16,32 +17,27 @@ const Tools = {
             if (data.headers[i].status === true)
                 headers[data.headers[i]['values']['key']] = data.headers[i]['values']['value'];
         }
-        /*let url = data.url;
-        if (data.type === 'GET') {
-            url += '?' + Tools.urlEncode(params);
-            params = {};
-        }*/
 
-        console.log("params,headers", params, headers);
+        console.log("Tools params,headers", params, headers);
         return new Promise((resolve, reject) => {
-                $.ajax({
-                    type: data.type,
-                    data: params,
-                    url: data.url,
-                    dataType: 'json',
-                    beforeSend: function(request) {
-                        for(let i in headers){
-                            request.setRequestHeader(i,headers[i]);
-                        }
-                    },
-                    success: res => {
-                        typeof resolve === 'function' && resolve(res);
-                    },
-                    error: err => {
-                        console.log(err);
-                        typeof reject === 'function' && reject({"error":err.statusText});
+            $.ajax({
+                type: data.type,
+                data: params,
+                url: data.url,
+                dataType: 'json',
+                beforeSend: function (request) {
+                    for (let i in headers) {
+                        request.setRequestHeader(i, headers[i]);
                     }
-                });
+                },
+                success: res => {
+                    resolve(res);
+                },
+                error: err => {
+                    console.log(err);
+                    reject({"error": err.statusText});
+                }
+            });
         });
     },
     urlEncode: (param) => {
